@@ -1,6 +1,6 @@
 package url
 
-type repositorioMemoria struc{
+type repositorioMemoria struct {
     urls map[string]*Url
 }
 

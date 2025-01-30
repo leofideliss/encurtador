@@ -5,8 +5,6 @@ import (
     "log"
     "net/http"
     "strings"
-
-
     "github.com/leofideliss/encurtador/url"
 )
 
