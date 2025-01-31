@@ -2,8 +2,8 @@ package url
 
 import(
     "math/rand"
-    "net/url"
     "time"
+    "net/url"
 )
 
 const (
@@ -15,10 +15,15 @@ func init(){
     rand.Seed(time.Now().UnixNano())
 }
 
+type Stats struct{
+    url *Url `json:"url"`
+    Clicks int `json:"clicks"`
+}
+
 type Url struct {
-    Id string
-    Criacao time.Time
-    Destino string
+    Id string `json:"id"`
+    Criacao time.Time `json:"criacao"`
+    Destino string `json:"destino"`
 }
 
 type Repositorio interface{
@@ -26,9 +31,9 @@ type Repositorio interface{
     BuscarPorId(id string) *Url
     BuscarPorUrl(url string) *Url
     Salvar(url Url) error
+    RegistrarClick(id string)
+    BuscarClicks(id string) int
 }
-
-type Headers map[string]string
 
 var repo Repositorio
 
@@ -37,21 +42,21 @@ func ConfigurarRepositorio( r Repositorio){
 }
 
 func BuscarOuCriarNovaUrl(destino string) (
-    u *string,
+    u *Url,
     nova bool,
     err error,){
 
-    if u = repo.BuscaPorUrl(destino); u != nil {
-        return nil , false , err
+    if u = repo.BuscarPorUrl(destino); u != nil {
+        return u , false , nil
     }
 
-    if _ , err = url.ParseRequestUri(destino); err != nil{
+    if _ , err = url.ParseRequestURI(destino); err != nil{
         return nil, false ,err
     }
 
-    url:=Url{gerarId() , time.Now() ,destino}
+    url := Url{gerarId() , time.Now() ,destino}
     repo.Salvar(url)
-    
+
     return &url,true,nil
 }
 
@@ -73,4 +78,13 @@ func gerarId() string{
 
 func Buscar(id string) *Url{
     return repo.BuscarPorId(id)
+}
+
+func RegistrarClick (id string){
+    repo.RegistrarClick(id)
+}
+
+func (u *Url) Stats() *Stats {
+    clicks := repo.BuscarClicks(u.Id)
+    return &Stats{u,clicks}
 }
